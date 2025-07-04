@@ -1,7 +1,56 @@
-<<<<<<< HEAD
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 📈 Groww Assignment – Stock Tracker App
+A React Native app that helps users explore top stock gainers and losers, view detailed stock insights, and manage personal watchlists — inspired by the Groww app experience.
 
-# Getting Started
+# 🎥 Demo
+https://github.com/user-attachments/assets/a3773ed4-2e2a-42d4-89c1-33f8af704ddc
+
+# ✨ Features
+🔍 Explore Screen
+View real-time top gainers and losers
+
+Cached responses to avoid API rate limits
+
+Search stocks using the symbol search bar
+
+Toggle between light/dark themes
+
+📊 Product Screen
+Detailed company overview, sector, and stats
+
+Interactive line chart with multiple time ranges (1D, 1W, 1M, etc.)
+
+Add stocks to one or more custom watchlists
+
+Responsive UI with toast notifications
+
+📁 Watchlists
+Create, edit, and delete multiple watchlists
+
+Save any stock to a specific list
+
+View saved stocks and navigate to their product screens
+
+Remove stocks from a list with one tap
+
+⚙️ Additional Highlights
+Local caching with AsyncStorage to support offline loading
+
+Modular and maintainable code structure (API decoupling, hooks, reusable components)
+
+Fully supports light and dark modes
+
+Designed with Feather Icons, clean typography, and adaptive spacing
+
+# 🚀 Getting Started
+📦 Requirements
+Node.js & npm
+
+React Native CLI
+
+Android Studio / Xcode (for emulator/simulator)
+
+AlphaVantage API Key (free) → https://www.alphavantage.co/support/#api-key
+
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
