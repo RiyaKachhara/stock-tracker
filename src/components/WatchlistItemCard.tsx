@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import {
   View,
@@ -7,7 +9,32 @@ import {
   StyleSheet,
 } from 'react-native';
 
-const WatchlistItemCard = ({ item, listName, theme, onNavigate, onRemove }) => {
+type Theme = {
+  card: string;
+  text: string;
+  secondaryText: string;
+};
+
+type StockItem = {
+  symbol: string;
+  name: string;
+};
+
+type Props = {
+  item: StockItem;
+  listName: string;
+  theme: Theme;
+  onNavigate: (symbol: string) => void;
+  onRemove: (symbol: string) => void;
+};
+
+const WatchlistItemCard: React.FC<Props> = ({
+  item,
+  listName,
+  theme,
+  onNavigate,
+  onRemove,
+}) => {
   const handleRemove = () => {
     Alert.alert(
       'Remove Item',

@@ -1,10 +1,17 @@
 
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { ThemeType } from '../../utils/theme';
 
-const TimeRangeSelector = ({ selectedRange, setSelectedRange, theme }) => (
+type Props = {
+  selectedRange: string;
+  setSelectedRange: (range: string) => void;
+  theme: ThemeType;
+};
+
+const TimeRangeSelector: React.FC<Props> = ({ selectedRange, setSelectedRange, theme }) => (
   <View style={styles.timeRange}>
-    {["1D", "1W", "1M", "3M", "6M", "1Y"].map((label) => (
+    {['1D', '1W', '1M', '3M', '6M', '1Y'].map((label) => (
       <TouchableOpacity
         key={label}
         style={[

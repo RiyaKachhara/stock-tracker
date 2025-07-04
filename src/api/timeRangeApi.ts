@@ -1,7 +1,15 @@
-import { fetchFromApi } from './baseApi';
 
-export const fetchTimeSeriesForRange = async (symbol, range) => {
-  let func, interval;
+
+import { fetchFromApi } from './baseApi';
+import { TimeSeriesPoint } from './stockDataApi';
+
+export const fetchTimeSeriesForRange = async (
+  symbol: string,
+  range: string
+): Promise<TimeSeriesPoint[]> => {
+  let func: string;
+  let interval: string | undefined;
+
   if (range === '1D') {
     func = 'TIME_SERIES_INTRADAY';
     interval = '5min';
@@ -11,7 +19,7 @@ export const fetchTimeSeriesForRange = async (symbol, range) => {
     func = 'TIME_SERIES_WEEKLY';
   }
 
-  const params = {
+  const params: Record<string, string> = {
     function: func,
     symbol,
     outputsize: 'compact',

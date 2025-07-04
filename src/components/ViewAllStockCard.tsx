@@ -1,8 +1,29 @@
+
+
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
-const ViewAllStockCard = ({ item, section, theme, onPress }) => {
+type StockItem = {
+  symbol: string;
+  price: string;
+};
+
+type Theme = {
+  card: string;
+  text: string;
+  secondaryText: string;
+};
+
+type Props = {
+  item: StockItem;
+  section: 'gainers' | 'losers';
+  theme: Theme;
+  onPress: () => void;
+};
+
+const ViewAllStockCard: React.FC<Props> = ({ item, section, theme, onPress }) => {
   const isGainer = section === 'gainers';
   const iconName = isGainer ? 'trending-up' : 'trending-down';
   const iconColor = isGainer ? '#27ae60' : '#c0392b';

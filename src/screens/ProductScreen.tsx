@@ -1,6 +1,5 @@
 
 
-
 import React, { useState } from 'react';
 import {
   View,
@@ -11,6 +10,8 @@ import {
 } from 'react-native';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
 import { useTheme } from '../utils/ThemeContext';
 import ProductHeader from '../components/Product/ProductHeader';
 import ProductChart from '../components/Product/ProductChart';
@@ -21,13 +22,18 @@ import CreateWatchlistModal from '../components/Product/CreateWatchlistModal';
 
 import { useProductData } from '../hooks/useProductData';
 import { useChartData } from '../hooks/useChartData';
+import { StocksStackParamList } from '../navigation/StocksStackNavigator';
 
-const ProductScreen = ({ route }) => {
+import { ThemeType } from '../utils/theme';
+
+type Props = NativeStackScreenProps<StocksStackParamList, 'Product'>;
+
+const ProductScreen: React.FC<Props> = ({ route }) => {
   const { symbol } = route.params;
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
 
-  const [selectedRange, setSelectedRange] = useState('1M');
-  const [watchlists, setWatchlists] = useState([]);
+  const [selectedRange, setSelectedRange] = useState<string>('1M');
+  const [watchlists, setWatchlists] = useState<string[]>([]);
   const [selectModalVisible, setSelectModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
@@ -50,17 +56,25 @@ const ProductScreen = ({ route }) => {
     setWatchlists(saved ? Object.keys(JSON.parse(saved)) : []);
   };
 
-  const saveToWatchlist = async (listName) => {
+  const saveToWatchlist = async (listName: string) => {
+    if (!overview) return;
+
     const saved = await AsyncStorage.getItem('WATCHLISTS');
     const all = saved ? JSON.parse(saved) : {};
     const list = all[listName] || [];
-    const already = list.some((i) => i.symbol === overview.Symbol);
+
+    const already = list.some((i: any) => i.symbol === overview!.Symbol);
     if (already) {
       Toast.show({ type: 'info', text1: 'Already Saved', text2: `Already in "${listName}"` });
       setSelectModalVisible(false);
       return;
     }
-    const updated = { ...all, [listName]: [...list, { symbol: overview.Symbol, name: overview.Name }] };
+
+    const updated = {
+      ...all,
+      [listName]: [...list, { symbol: overview!.Symbol, name: overview!.Name }],
+    };
+
     await AsyncStorage.setItem('WATCHLISTS', JSON.stringify(updated));
     setIsInWatchlist(true);
     setSelectModalVisible(false);
@@ -68,14 +82,21 @@ const ProductScreen = ({ route }) => {
   };
 
   const createNewWatchlist = async () => {
-    if (!newListName.trim()) return;
+    if (!newListName.trim() || !overview) return;
+
     const saved = await AsyncStorage.getItem('WATCHLISTS');
     const all = saved ? JSON.parse(saved) : {};
+
     if (all[newListName]) {
-      Toast.show({ type: 'info', text1: 'Exists', text2: 'A watchlist with this name already exists.' });
+      Toast.show({
+        type: 'info',
+        text1: 'Exists',
+        text2: 'A watchlist with this name already exists.',
+      });
       return;
     }
-    all[newListName] = [{ symbol: overview.Symbol, name: overview.Name }];
+
+    all[newListName] = [{ symbol: overview!.Symbol, name: overview!.Name }];
     await AsyncStorage.setItem('WATCHLISTS', JSON.stringify(all));
     setIsInWatchlist(true);
     setCreateModalVisible(false);

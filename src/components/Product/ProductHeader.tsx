@@ -1,8 +1,33 @@
+
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const ProductHeader = ({ overview, isInWatchlist, onBookmarkPress, theme }) => (
+type Overview = {
+  Name: string;
+  Symbol: string;
+};
+
+type Theme = {
+  text: string;
+  secondaryText: string;
+  accent: string;
+};
+
+type Props = {
+  overview: Overview;
+  isInWatchlist: boolean;
+  onBookmarkPress: () => void;
+  theme: Theme;
+};
+
+const ProductHeader: React.FC<Props> = ({
+  overview,
+  isInWatchlist,
+  onBookmarkPress,
+  theme,
+}) => (
   <View style={styles.headerSection}>
     <View style={{ flex: 1, paddingRight: 32 }}>
       <Text style={[styles.title, { color: theme.text }]} numberOfLines={2} adjustsFontSizeToFit>
@@ -23,9 +48,19 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  title: { fontSize: 24, fontWeight: 'bold' },
-  symbol: { fontSize: 18, marginBottom: 6 },
-  bookmarkButton: { position: 'absolute', right: 0, top: 0 },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  symbol: {
+    fontSize: 18,
+    marginBottom: 6,
+  },
+  bookmarkButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
 });
 
 export default ProductHeader;

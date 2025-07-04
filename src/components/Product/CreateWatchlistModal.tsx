@@ -1,7 +1,35 @@
-import React from 'react';
-import { Modal, View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 
-const CreateWatchlistModal = ({
+import React from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  StyleSheet,
+  ColorValue,
+} from 'react-native';
+
+type Theme = {
+  card: string;
+  text: string;
+  secondaryText: string;
+  accent: string;
+  background: string;
+  isDark: boolean;
+};
+
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  onCreate: () => void;
+  newListName: string;
+  setNewListName: (name: string) => void;
+  theme: Theme;
+   
+};
+
+const CreateWatchlistModal: React.FC<Props> = ({
   visible,
   onClose,
   onCreate,
@@ -15,7 +43,7 @@ const CreateWatchlistModal = ({
         <Text style={[styles.modalTitle, { color: theme.text }]}>Create New Watchlist</Text>
         <TextInput
           placeholder="Enter watchlist name"
-          placeholderTextColor={theme.secondaryText}
+          placeholderTextColor={theme.secondaryText as ColorValue}
           value={newListName}
           onChangeText={setNewListName}
           style={[

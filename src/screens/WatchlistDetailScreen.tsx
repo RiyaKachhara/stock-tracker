@@ -1,27 +1,34 @@
 
-import React, { useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import React, { useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
-  Alert,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "../utils/ThemeContext";
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '../utils/ThemeContext';
 import WatchlistItemCard from '../components/WatchlistItemCard';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { WatchlistStackParamList } from '../navigation/WatchlistStackNavigator';
 
-const WatchlistDetailScreen = ({ route, navigation }) => {
+type Props = NativeStackScreenProps<WatchlistStackParamList, 'WatchlistDetail'>;
+
+type WatchlistItem = {
+  symbol: string;
+  name: string;
+};
+
+const WatchlistDetailScreen = ({ route, navigation }: Props) => {
   const { theme } = useTheme();
   const { listName } = route.params;
   const [loading, setLoading] = useState(true);
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<WatchlistItem[]>([]);
 
   const loadItems = async () => {
-    const saved = await AsyncStorage.getItem("WATCHLISTS");
+    const saved = await AsyncStorage.getItem('WATCHLISTS');
     if (saved) {
       const all = JSON.parse(saved);
       setItems(all[listName] || []);
@@ -44,15 +51,15 @@ const WatchlistDetailScreen = ({ route, navigation }) => {
     }, [listName])
   );
 
-  const removeItem = async (symbol) => {
-    const saved = await AsyncStorage.getItem("WATCHLISTS");
+  const removeItem = async (symbol: string) => {
+    const saved = await AsyncStorage.getItem('WATCHLISTS');
     if (saved) {
       const all = JSON.parse(saved);
       const newItems = (all[listName] || []).filter(
-        (item) => item.symbol !== symbol
+        (item: WatchlistItem) => item.symbol !== symbol
       );
       all[listName] = newItems;
-      await AsyncStorage.setItem("WATCHLISTS", JSON.stringify(all));
+      await AsyncStorage.setItem('WATCHLISTS', JSON.stringify(all));
       setItems(newItems);
     }
   };
@@ -74,23 +81,21 @@ const WatchlistDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  const renderItem = ({ item }) => (
-  <WatchlistItemCard
-    item={item}
-    listName={listName}
-    theme={theme}
-    onNavigate={(symbol) => navigation.navigate('Product', { symbol })}
-    onRemove={removeItem}
-  />
-);
-
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Text style={[styles.sectionTitle, { color: theme.text }]}>{listName}</Text>
       <FlatList
-        key={"2columns"}
+        key={'2columns'}
         data={items}
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <WatchlistItemCard
+            item={item}
+            listName={listName}
+            theme={theme}
+            onNavigate={(symbol) => navigation.navigate('Product', { symbol })}
+            onRemove={removeItem}
+          />
+        )}
         keyExtractor={(item) => item.symbol}
         numColumns={2}
         columnWrapperStyle={styles.row}
@@ -101,27 +106,10 @@ const WatchlistDetailScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  sectionTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 8 },
-  row: { justifyContent: "space-between" },
-  card: {
-    borderRadius: 8,
-    padding: 16,
-    marginVertical: 8,
-    flex: 0.48,
-    elevation: 2,
-  },
-  symbol: { fontSize: 16, fontWeight: "600" },
-  name: { fontSize: 14 },
-  removeButton: {
-    backgroundColor: "#e74c3c",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    marginTop: 8,
-    alignSelf: "flex-start",
-  },
-  removeButtonText: { color: "white", fontSize: 14 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
+  row: { justifyContent: 'space-between' },
 });
 
 export default WatchlistDetailScreen;
+

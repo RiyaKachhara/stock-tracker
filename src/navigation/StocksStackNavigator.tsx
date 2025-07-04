@@ -6,7 +6,13 @@ import ExploreScreen from '../screens/ExploreScreen';
 import ProductScreen from '../screens/ProductScreen';
 import ViewAllScreen from '../screens/ViewAllScreen';
 
-const Stack = createNativeStackNavigator();
+export type StocksStackParamList = {
+  Explore: undefined;
+  Product: { symbol: string };
+  ViewAll: { section: 'gainers' | 'losers'; data: { id: string; symbol: string; price: string }[] };
+};
+
+const Stack = createNativeStackNavigator<StocksStackParamList>();
 
 export default function StocksStackNavigator() {
   return (

@@ -1,8 +1,18 @@
+
 import React from 'react';
 import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
+import { ThemeType } from '../../utils/theme';
 
-const ProductChart = ({ chartData, chartLoading, theme }) => (
+type ChartPoint = { value: number };
+
+type Props = {
+  chartData: ChartPoint[];
+  chartLoading: boolean;
+  theme: ThemeType;
+};
+
+const ProductChart: React.FC<Props> = ({ chartData, chartLoading, theme }) => (
   <View style={[styles.chartWrapper, { backgroundColor: theme.card }]}>
     {chartLoading ? (
       <ActivityIndicator size="small" />
@@ -15,18 +25,15 @@ const ProductChart = ({ chartData, chartLoading, theme }) => (
         hideDataPoints
         initialSpacing={0}
         spacing={10}
-        showYAxis={false}
-        showVerticalLines={false}
-        showXAxisIndices={false}
-        yAxisTextColor={theme.isDark ? '#ffffff' : '#333333'}
-        showYAxisLines={false}
-        backgroundLinesColor="transparent"
-        rulesColor="transparent"
+        yAxisThickness={0}
+        xAxisThickness={0}
         areaChart
         startFillColor={theme.accent}
         endFillColor={theme.background}
         startOpacity={0.2}
         endOpacity={0}
+        backgroundColor="transparent"
+        hideRules
         isAnimated
       />
     ) : (

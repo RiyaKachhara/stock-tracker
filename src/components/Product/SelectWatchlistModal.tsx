@@ -1,7 +1,34 @@
-import React from 'react';
-import { Modal, View, Text, FlatList, Pressable, StyleSheet } from 'react-native';
 
-const SelectWatchlistModal = ({
+
+
+import React from 'react';
+import {
+  Modal,
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  ColorValue,
+} from 'react-native';
+
+type Theme = {
+  card: string;
+  text: string;
+  accent: string;
+  isDark: boolean;
+};
+
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  watchlists: string[];
+  saveToWatchlist: (listName: string) => void;
+  onCreateNewPress: () => void;
+  theme: Theme;
+};
+
+const SelectWatchlistModal: React.FC<Props> = ({
   visible,
   onClose,
   watchlists,
@@ -24,7 +51,13 @@ const SelectWatchlistModal = ({
           ListFooterComponent={
             <>
               <Pressable
-                style={[styles.modalItem, { borderTopWidth: 1, borderTopColor: theme.isDark ? '#444' : '#ccc' }]}
+                style={[
+                  styles.modalItem,
+                  {
+                    borderTopWidth: 1,
+                    borderTopColor: (theme.isDark ? '#444' : '#ccc') as ColorValue,
+                  },
+                ]}
                 onPress={onCreateNewPress}
               >
                 <Text style={{ color: theme.accent }}>➕ Create New Watchlist</Text>

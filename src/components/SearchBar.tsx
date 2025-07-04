@@ -11,18 +11,32 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
+import debounce from 'lodash.debounce';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import { useTheme } from '../utils/ThemeContext';
 import { fetchSymbolSearch } from '../api/searchApi';
-import debounce from 'lodash.debounce';
+import { StocksStackParamList } from '../navigation/StocksStackNavigator';
 
-const SearchBar = ({ navigation }) => {
+// Props type for SearchBar
+type SearchBarProps = {
+  navigation: NativeStackNavigationProp<StocksStackParamList, 'Explore'>;
+};
+
+// Type for each search result item
+type SearchResult = {
+  symbol: string;
+  name: string;
+};
+
+const SearchBar: React.FC<SearchBarProps> = ({ navigation }) => {
   const { theme } = useTheme();
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
 
   const debouncedFetchResults = useCallback(
-    debounce(async (keyword) => {
+    debounce(async (keyword: string) => {
       setLoading(true);
       try {
         const data = await fetchSymbolSearch(keyword);
@@ -44,7 +58,7 @@ const SearchBar = ({ navigation }) => {
     debouncedFetchResults(query);
   }, [query]);
 
-  const onSelect = (symbol) => {
+  const onSelect = (symbol: string) => {
     setQuery('');
     setResults([]);
     navigation.navigate('Product', { symbol });

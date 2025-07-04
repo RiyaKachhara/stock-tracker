@@ -1,6 +1,6 @@
 
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,29 +8,36 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
+  ListRenderItem,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchTopGainersLosers } from '../api/stockDataApi';
-import { useExploreData } from '../hooks/useExploreData';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Feather';
+
+import { useExploreData } from '../hooks/useExploreData';
 import SearchBar from '../components/SearchBar';
-import { useTheme } from '../utils/ThemeContext';
 import StockCard from '../components/StockCard';
+import { useTheme } from '../utils/ThemeContext';
+import { StocksStackParamList } from '../navigation/StocksStackNavigator';
 
+type Props = NativeStackScreenProps<StocksStackParamList, 'Explore'>;
 
+type StockItem = {
+  id: string;
+  symbol: string;
+  price: string;
+};
 
-const ExploreScreen = ({ navigation }) => {
+const ExploreScreen: React.FC<Props> = ({ navigation }) => {
   const { theme, toggleTheme } = useTheme();
   const { loading, gainers, losers, error } = useExploreData();
 
-  const renderItem = ({ item }) => (
-  <StockCard
-    item={item}
-    theme={theme}
-    onPress={() => navigation.navigate('Product', { symbol: item.symbol })}
-  />
-);
-
+  const renderItem: ListRenderItem<StockItem> = ({ item }) => (
+    <StockCard
+      item={item}
+      theme={theme}
+      onPress={() => navigation.navigate('Product', { symbol: item.symbol })}
+    />
+  );
 
   if (loading) {
     return (
@@ -124,30 +131,6 @@ const styles = StyleSheet.create({
   },
   row: {
     justifyContent: 'space-between',
-  },
-  card: {
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
-    flex: 0.48,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  symbol: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  price: {
-    fontSize: 14,
-    marginTop: 4,
   },
 });
 

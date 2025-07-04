@@ -1,5 +1,6 @@
 
-import React, { useEffect, useState } from "react";
+
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,22 +8,28 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
-import { useTheme } from "../utils/ThemeContext";
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../utils/ThemeContext';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { WatchlistStackParamList } from '../navigation/WatchlistStackNavigator';
 
-const WatchlistScreen = ({ navigation }) => {
+type Props = NativeStackScreenProps<WatchlistStackParamList, 'Watchlist'>;
+
+type Watchlists = Record<string, { symbol: string; name: string }[]>;
+
+const WatchlistScreen = ({ navigation }: Props) => {
   const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
-  const [watchlists, setWatchlists] = useState({});
+  const [watchlists, setWatchlists] = useState<Watchlists>({});
 
   useFocusEffect(
     React.useCallback(() => {
       let active = true;
       async function load() {
         try {
-          const saved = await AsyncStorage.getItem("WATCHLISTS");
+          const saved = await AsyncStorage.getItem('WATCHLISTS');
           if (saved && active) {
             setWatchlists(JSON.parse(saved));
           }
@@ -64,9 +71,7 @@ const WatchlistScreen = ({ navigation }) => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[styles.card, { backgroundColor: theme.card }]}
-            onPress={() =>
-              navigation.navigate("WatchlistDetail", { listName: item })
-            }
+            onPress={() => navigation.navigate('WatchlistDetail', { listName: item })}
           >
             <Text style={[styles.name, { color: theme.text }]}>{item}</Text>
             <Text style={[styles.count, { color: theme.secondaryText }]}>
@@ -82,15 +87,15 @@ const WatchlistScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: { padding: 16, flex: 1 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  sectionTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 8 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 8 },
   card: {
     borderRadius: 8,
     padding: 16,
     marginVertical: 8,
     elevation: 2,
   },
-  name: { fontSize: 16, fontWeight: "600" },
+  name: { fontSize: 16, fontWeight: '600' },
   count: { fontSize: 14 },
 });
 

@@ -1,14 +1,15 @@
-// src/api/baseApi.js
+
+
 import { API_KEY } from '../config';
 
 const BASE_URL = 'https://www.alphavantage.co/query';
 
-export const buildUrl = (params) => {
+export const buildUrl = (params: Record<string, string>) => {
   const query = new URLSearchParams({ ...params, apikey: API_KEY });
-  return `${BASE_URL}?${query}`;
+  return `${BASE_URL}?${query.toString()}`;
 };
 
-export const fetchFromApi = async (params) => {
+export const fetchFromApi = async (params: Record<string, string>): Promise<any> => {
   try {
     const url = buildUrl(params);
     const res = await fetch(url);
