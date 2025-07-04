@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../utils/ThemeContext";
+import WatchlistItemCard from '../components/WatchlistItemCard';
 
 const WatchlistDetailScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -74,37 +75,14 @@ const WatchlistDetailScreen = ({ route, navigation }) => {
   }
 
   const renderItem = ({ item }) => (
-    <View style={[styles.card, { backgroundColor: theme.card }]}>
-      <TouchableOpacity
-        style={{ flex: 1 }}
-        onPress={() => navigation.navigate("Product", { symbol: item.symbol })}
-      >
-        <Text style={[styles.symbol, { color: theme.text }]}>{item.symbol}</Text>
-        <Text style={[styles.name, { color: theme.secondaryText }]}>
-          {item.name}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => {
-          Alert.alert(
-            "Remove Item",
-            `Remove ${item.symbol} from "${listName}"?`,
-            [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Remove",
-                style: "destructive",
-                onPress: () => removeItem(item.symbol),
-              },
-            ]
-          );
-        }}
-        style={styles.removeButton}
-      >
-        <Text style={styles.removeButtonText}>Remove</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  <WatchlistItemCard
+    item={item}
+    listName={listName}
+    theme={theme}
+    onNavigate={(symbol) => navigation.navigate('Product', { symbol })}
+    onRemove={removeItem}
+  />
+);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

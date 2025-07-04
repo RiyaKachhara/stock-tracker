@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   TextInput,
@@ -10,10 +11,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
-import { API_KEY } from '../config';
 import { useTheme } from '../utils/ThemeContext';
-
-const BASE_URL = 'https://www.alphavantage.co/query';
+import { fetchSymbolSearch } from '../api/searchApi';
+import debounce from 'lodash.debounce';
 
 const SearchBar = ({ navigation }) => {
   const { theme } = useTheme();
@@ -21,39 +21,28 @@ const SearchBar = ({ navigation }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const debouncedFetchResults = useCallback(
+    debounce(async (keyword) => {
+      setLoading(true);
+      try {
+        const data = await fetchSymbolSearch(keyword);
+        setResults(data);
+      } catch (err) {
+        console.error('Search error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }, 400),
+    []
+  );
+
   useEffect(() => {
     if (!query) {
       setResults([]);
       return;
     }
-
-    const timeout = setTimeout(() => {
-      fetchResults(query);
-    }, 500); // debounce
-
-    return () => clearTimeout(timeout);
+    debouncedFetchResults(query);
   }, [query]);
-
-  const fetchResults = async (keyword) => {
-    setLoading(true);
-    try {
-      const url = `${BASE_URL}?function=SYMBOL_SEARCH&keywords=${keyword}&apikey=${API_KEY}`;
-      const res = await fetch(url);
-      const json = await res.json();
-      const matches = json.bestMatches || [];
-
-      setResults(
-        matches.map((item) => ({
-          symbol: item['1. symbol'],
-          name: item['2. name'],
-        }))
-      );
-    } catch (err) {
-      console.error('Search error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSelect = (symbol) => {
     setQuery('');

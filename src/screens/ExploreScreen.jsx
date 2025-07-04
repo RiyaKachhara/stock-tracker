@@ -10,91 +10,27 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchTopGainersLosers } from '../api/alphaVantage';
+import { fetchTopGainersLosers } from '../api/stockDataApi';
+import { useExploreData } from '../hooks/useExploreData';
 import Icon from 'react-native-vector-icons/Feather';
 import SearchBar from '../components/SearchBar';
 import { useTheme } from '../utils/ThemeContext';
+import StockCard from '../components/StockCard';
 
-const CACHE_KEY = 'TOP_GAINERS_CACHE';
-const CACHE_TIME_KEY = 'TOP_GAINERS_CACHE_TIME';
-const CACHE_EXPIRATION_MS = 5 * 60 * 1000;
+
 
 const ExploreScreen = ({ navigation }) => {
   const { theme, toggleTheme } = useTheme();
+  const { loading, gainers, losers, error } = useExploreData();
 
-  const [loading, setLoading] = useState(true);
-  const [gainers, setGainers] = useState([]);
-  const [losers, setLosers] = useState([]);
-  const [error, setError] = useState(null);
+  const renderItem = ({ item }) => (
+  <StockCard
+    item={item}
+    theme={theme}
+    onPress={() => navigation.navigate('Product', { symbol: item.symbol })}
+  />
+);
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const cachedData = await AsyncStorage.getItem(CACHE_KEY);
-        const cachedTime = await AsyncStorage.getItem(CACHE_TIME_KEY);
-        const now = Date.now();
-
-        if (
-          cachedData &&
-          cachedTime &&
-          now - parseInt(cachedTime) < CACHE_EXPIRATION_MS
-        ) {
-          let data = JSON.parse(cachedData);
-          if (!data?.top_gainers || !data?.top_losers) throw new Error();
-          processData(data);
-        } else {
-          const data = await fetchTopGainersLosers();
-          if (!data.top_gainers || !data.top_losers)
-            throw new Error('API returned invalid structure.');
-          await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(data));
-          await AsyncStorage.setItem(CACHE_TIME_KEY, now.toString());
-          processData(data);
-        }
-      } catch (err) {
-        setError('Failed to load data.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    function processData(data) {
-      setGainers(
-        data.top_gainers.map((item, index) => ({
-          id: `g-${index}`,
-          symbol: item.ticker,
-          price: `$${item.price}`,
-        }))
-      );
-      setLosers(
-        data.top_losers.map((item, index) => ({
-          id: `l-${index}`,
-          symbol: item.ticker,
-          price: `$${item.price}`,
-        }))
-      );
-    }
-
-    loadData();
-  }, []);
-
-  const renderItem = ({ item }) => {
-    const isGainer = item.id.startsWith('g');
-    const iconName = isGainer ? 'trending-up' : 'trending-down';
-    const iconColor = isGainer ? '#27ae60' : '#c0392b';
-
-    return (
-      <TouchableOpacity
-        style={[styles.card, { backgroundColor: theme.card }]}
-        onPress={() => navigation.navigate('Product', { symbol: item.symbol })}
-      >
-        <View style={styles.cardHeader}>
-          <Icon name={iconName} size={20} color={iconColor} />
-          <Text style={[styles.symbol, { color: iconColor }]}>{item.symbol}</Text>
-        </View>
-        <Text style={[styles.price, { color: theme.secondaryText }]}>{item.price}</Text>
-      </TouchableOpacity>
-    );
-  };
 
   if (loading) {
     return (

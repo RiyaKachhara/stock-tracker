@@ -1,15 +1,16 @@
 
-import React, { useEffect, useState } from 'react';
+
+
+import React, { useState } from 'react';
 import {
   View,
   ScrollView,
   ActivityIndicator,
   StyleSheet,
+  Text,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
-import { fetchTimeSeriesForRange } from '../api/fetchTimeSeriesForRange';
-import { fetchCompanyOverview } from '../api/alphaVantage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../utils/ThemeContext';
 import ProductHeader from '../components/Product/ProductHeader';
 import ProductChart from '../components/Product/ProductChart';
@@ -18,30 +19,31 @@ import ProductAbout from '../components/Product/ProductAbout';
 import SelectWatchlistModal from '../components/Product/SelectWatchlistModal';
 import CreateWatchlistModal from '../components/Product/CreateWatchlistModal';
 
+import { useProductData } from '../hooks/useProductData';
+import { useChartData } from '../hooks/useChartData';
+
 const ProductScreen = ({ route }) => {
   const { symbol } = route.params;
   const { theme } = useTheme();
 
-  const [loading, setLoading] = useState(true);
-  const [overview, setOverview] = useState(null);
-  const [error, setError] = useState(null);
+  const [selectedRange, setSelectedRange] = useState('1M');
   const [watchlists, setWatchlists] = useState([]);
   const [selectModalVisible, setSelectModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
-  const [chartData, setChartData] = useState([]);
-  const [selectedRange, setSelectedRange] = useState('1M');
-  const [chartLoading, setChartLoading] = useState(false);
-  const [isInWatchlist, setIsInWatchlist] = useState(false);
 
-  const checkIfInWatchlist = async (sym) => {
-    const saved = await AsyncStorage.getItem('WATCHLISTS');
-    if (!saved) return setIsInWatchlist(false);
-    const all = JSON.parse(saved);
-    const allItems = Object.values(all).flat();
-    const exists = allItems.some((item) => item.symbol === sym);
-    setIsInWatchlist(exists);
-  };
+  const {
+    overview,
+    loading,
+    error,
+    isInWatchlist,
+    setIsInWatchlist,
+  } = useProductData(symbol);
+
+  const {
+    chartData,
+    chartLoading,
+  } = useChartData(symbol, selectedRange);
 
   const loadWatchlists = async () => {
     const saved = await AsyncStorage.getItem('WATCHLISTS');
@@ -60,7 +62,7 @@ const ProductScreen = ({ route }) => {
     }
     const updated = { ...all, [listName]: [...list, { symbol: overview.Symbol, name: overview.Name }] };
     await AsyncStorage.setItem('WATCHLISTS', JSON.stringify(updated));
-    await checkIfInWatchlist(symbol);
+    setIsInWatchlist(true);
     setSelectModalVisible(false);
     Toast.show({ type: 'success', text1: 'Added', text2: `Saved to "${listName}"` });
   };
@@ -75,66 +77,16 @@ const ProductScreen = ({ route }) => {
     }
     all[newListName] = [{ symbol: overview.Symbol, name: overview.Name }];
     await AsyncStorage.setItem('WATCHLISTS', JSON.stringify(all));
-    await checkIfInWatchlist(symbol);
+    setIsInWatchlist(true);
     setCreateModalVisible(false);
     setSelectModalVisible(false);
     setNewListName('');
     Toast.show({ type: 'success', text1: 'Created', text2: `Saved to "${newListName}"` });
   };
 
-  const loadChartDataForRange = async (range) => {
-    setChartLoading(true);
-    try {
-      const series = await fetchTimeSeriesForRange(symbol, range);
-      if (!series || series.length === 0) {
-        setError('Chart data unavailable.');
-        setChartData([]);
-        return;
-      }
-      const parsed = series.map((point) => ({ value: point.close }));
-      setChartData(parsed);
-    } catch (err) {
-      setError('Failed to load chart data.');
-      setChartData([]);
-    } finally {
-      setChartLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    async function loadData() {
-      const OVERVIEW_CACHE_KEY = `OVERVIEW_${symbol}`;
-      const OVERVIEW_CACHE_TIME_KEY = `OVERVIEW_TIME_${symbol}`;
-      const CACHE_EXPIRATION_MS = 5 * 60 * 1000;
-      const now = Date.now();
-
-      try {
-        let overviewData;
-        const cachedOverview = await AsyncStorage.getItem(OVERVIEW_CACHE_KEY);
-        const cachedOverviewTime = await AsyncStorage.getItem(OVERVIEW_CACHE_TIME_KEY);
-
-        if (cachedOverview && cachedOverviewTime && now - parseInt(cachedOverviewTime) < CACHE_EXPIRATION_MS) {
-          overviewData = JSON.parse(cachedOverview);
-        } else {
-          overviewData = await fetchCompanyOverview(symbol);
-          await AsyncStorage.setItem(OVERVIEW_CACHE_KEY, JSON.stringify(overviewData));
-          await AsyncStorage.setItem(OVERVIEW_CACHE_TIME_KEY, now.toString());
-        }
-        setOverview(overviewData);
-        await checkIfInWatchlist(symbol);
-        await loadChartDataForRange(selectedRange);
-      } catch (err) {
-        setError('Failed to load company info.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, [symbol]);
-
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: theme.background }]}> 
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -142,7 +94,7 @@ const ProductScreen = ({ route }) => {
 
   if (error || !overview || !overview.Name) {
     return (
-      <View style={[styles.center, { backgroundColor: theme.background }]}> 
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
         <Text style={{ color: theme.text }}>{error || 'No data available.'}</Text>
       </View>
     );
@@ -164,7 +116,6 @@ const ProductScreen = ({ route }) => {
         <TimeRangeSelector
           selectedRange={selectedRange}
           setSelectedRange={setSelectedRange}
-          loadChartDataForRange={loadChartDataForRange}
           theme={theme}
         />
         <ProductAbout overview={overview} theme={theme} />

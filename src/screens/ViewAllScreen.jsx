@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useTheme } from '../utils/ThemeContext';
+import ViewAllStockCard from '../components/ViewAllStockCard';
+
 
 export default function ViewAllScreen({ route, navigation }) {
   const { theme } = useTheme();
@@ -28,24 +30,15 @@ export default function ViewAllScreen({ route, navigation }) {
 
   const visibleData = data.slice(0, visibleCount);
 
-  const renderItem = ({ item }) => {
-    const isGainer = section === 'gainers';
-    const iconName = isGainer ? 'trending-up' : 'trending-down';
-    const iconColor = isGainer ? '#27ae60' : '#c0392b';
+  const renderItem = ({ item }) => (
+  <ViewAllStockCard
+    item={item}
+    section={section}
+    theme={theme}
+    onPress={() => navigation.navigate('Product', { symbol: item.symbol })}
+  />
+);
 
-    return (
-      <TouchableOpacity
-        style={[styles.card, { backgroundColor: theme.card }]}
-        onPress={() => navigation.navigate('Product', { symbol: item.symbol })}
-      >
-        <View style={styles.cardHeader}>
-          <Icon name={iconName} size={20} color={iconColor} />
-          <Text style={[styles.symbol, { color: iconColor }]}>{item.symbol}</Text>
-        </View>
-        <Text style={[styles.price, { color: theme.secondaryText }]}>{item.price}</Text>
-      </TouchableOpacity>
-    );
-  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
